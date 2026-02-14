@@ -21,19 +21,6 @@ def load_img(path: str) -> Image.Image:
         print(e)
 
     return None
-
-def preview_img(img: Image.Image) -> Image.Image:
-    if not img:
-        return None
-    
-    scale = 1.0
-
-    if img.width >= img.height:
-        scale = 256 / img.width
-    else:
-        scale = 256 / img.height
-
-    return img.resize([int(img.width * scale), int(img.height * scale)])
     
 def make_bed(bed_img: Image.Image, custom_img: Image.Image) -> Image.Image:
     if not bed_img or not custom_img:
