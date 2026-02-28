@@ -15,7 +15,7 @@ def load_bed(color: str) -> Image.Image:
 
 def load_img(path: str) -> Image.Image:
     try:
-        bed = Image.open(path)
+        bed = Image.open(path).convert('RGBA')
         return bed
     except Exception as e:
         print(e)
@@ -84,8 +84,8 @@ def make_bed(bed_img: Image.Image, img: Image.Image, fit='crop') -> Image.Image:
         case 'pad':
             bed_top = pad_image(img)
 
-    # I do in fact need this
-    bed_top = bed_top.convert('RGBA')
+    # I actually don't need this
+    # bed_top = bed_top.convert('RGBA')
     # Paste that image on top of the bed
     new_bed.alpha_composite(im = bed_top, dest = LEFT_UPPER)
     return new_bed
