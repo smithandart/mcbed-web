@@ -22,7 +22,14 @@ Here is a step-by-step guide that will (hopefully) help you make your own resour
 ---
 2.  # How to create your modified bed textures:
     -   Select the bed color
-    -   Select your custom image (will be cropped/resized to 256x512 from the center)
+    -   Select how your image will be fit
+        -   Crop (Default): image gets cropped in the center to a 1:2 ratio, then resized to 256x512
+            -   Parts of the image may be cut off
+        -   Stretch: image will be resized to be 256x512 with no respect to aspect ratio
+            -   Image could end up looking very distorted
+        -   Pad: image will be padded on the top to be 1:2 ratio, then resized to 256x512
+            -   Image may look very small on the bottom of the bed
+    -   Select your custom image
     -   Download your modified bed texture
 
 ---
