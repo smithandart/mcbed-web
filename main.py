@@ -33,7 +33,7 @@ IMAGE_FORMATS = [
 # The section that lets the user select a bed color and shows the bed texture for reference
 def color_selector():
     st.header('Select your bed color 😀', divider=True)
-    bed_color = st.selectbox('', BED_COLORS)
+    bed_color = st.selectbox('bed color selection', BED_COLORS, label_visibility=False)
 
     st.session_state.bed_color = bed_color
     st.session_state.base_bed = bed_img.load_bed(bed_color)
@@ -48,7 +48,7 @@ def color_selector():
 # The part that lets the user select an option for how the image will be fit on the bed
 def image_fit() -> None:
     st.header('Choose how your image will fit 😀', divider=True)
-    option = st.selectbox('', ['crop','stretch','pad'])
+    option = st.selectbox('image fit selection', ['crop','stretch','pad'], label_visibility=False)
 
     if option:
         st.session_state.image_fit = option
@@ -57,7 +57,7 @@ def image_fit() -> None:
 def image_selector():
     st.header('Select your custom image 😀', divider=True)
     # Select a custom image to put on the bed
-    uploaded_img = st.file_uploader('', type=IMAGE_FORMATS)
+    uploaded_img = st.file_uploader('image uploader', type=IMAGE_FORMATS, label_visibility=False)
     st.session_state.custom_img = None
 
     if uploaded_img:
