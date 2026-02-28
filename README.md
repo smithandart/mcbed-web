@@ -2,6 +2,11 @@
 
 Here is a step-by-step guide that will (hopefully) help you make your own resource pack
 
+# OPEN IN YOUR BROWSER
+Click this link: https://mcbed-web.streamlit.app/
+
+
+# or perhaps you would rather run the app yourself...
 ---
 1.  # How to run the program:
     - Using only Python
