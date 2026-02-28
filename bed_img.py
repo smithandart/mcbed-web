@@ -84,6 +84,8 @@ def make_bed(bed_img: Image.Image, img: Image.Image, fit='crop') -> Image.Image:
         case 'pad':
             bed_top = pad_image(img)
 
+    # I do in fact need this
+    bed_top = bed_top.convert('RGBA')
     # Paste that image on top of the bed
     new_bed.alpha_composite(im = bed_top, dest = LEFT_UPPER)
     return new_bed
