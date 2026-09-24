@@ -1,6 +1,7 @@
 import streamlit as st
 import bed_img
 import io
+import zipfile
 
 # File names of each bed color in Minecraft
 BED_COLORS = [
@@ -30,74 +31,78 @@ IMAGE_FORMATS = [
     '.webp'
 ]
 
-# The section that lets the user select a bed color and shows the bed texture for reference
-def color_selector():
-    st.header('Select your bed color 😀', divider=True)
-    bed_color = st.selectbox('bed color selection', BED_COLORS, label_visibility='hidden')
-
-    st.session_state.bed_color = bed_color
-    st.session_state.base_bed = bed_img.load_bed(bed_color)
-
-    if st.session_state.base_bed:
-        # Display a preview of the bed color
-        st.image(st.session_state.base_bed, width=256)
-    else:
-        # Show missing bed texture warning
-        st.write('Missing texture of this bed color...')
-
 # The part that lets the user select an option for how the image will be fit on the bed
 def image_fit() -> None:
     st.header('Choose how your image will fit 😀', divider=True)
-    option = st.selectbox('image fit selection', ['crop','stretch','pad'], label_visibility='hidden')
+    option = st.selectbox('image fit selection', ['stretch','crop','pad'], label_visibility='hidden')
 
     if option:
         st.session_state.image_fit = option
 
-# The image selection service that asks the user to give an image
-def image_selector():
-    st.header('Select your custom image 😀', divider=True)
+# The image selection widgets that ask the user to give an image
+@st.fragment
+def image_selector(key):
+    st.subheader(f"{key} 😀", text_alignment='right')
     # Select a custom image to put on the bed
-    uploaded_img = st.file_uploader('image uploader', type=IMAGE_FORMATS, label_visibility='hidden')
-    st.session_state.custom_img = None
+    st.file_uploader('image uploader', type=IMAGE_FORMATS, label_visibility='hidden', key=key)
 
-    if uploaded_img:
-        # Set currently selected image
-        st.session_state.custom_img = bed_img.load_img(uploaded_img)
-    
-    if st.session_state.custom_img:
-        # Display a preview of your custom image
-        st.image(st.session_state.custom_img, width=256)
-    else:
-        st.write('Waiting for a custom image...')
+def image_download():
+    st.header('Process your images 😀', divider=True)
+    if st.button('CREATE ZIP'):
 
-# This is how the user can see how the final product will look and can enter their credit card information to download
-def modified_bed():
-    st.header('Download your modified bed texture 😀', divider=True)
-    # Show edited bed texture
-    if st.session_state.custom_img and st.session_state.base_bed:
-        st.subheader('Modified bed texture:')
+        zip_buffer = io.BytesIO()
 
-        # I LOVE SESSION STATE SO MUCH
-        st.session_state.edited_bed = bed_img.make_bed(st.session_state.base_bed, st.session_state.custom_img, fit=st.session_state.image_fit)
-        
-        buf = io.BytesIO()
-        st.session_state.edited_bed.save(buf, format='PNG')
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            
+            for color in BED_COLORS:
+                    print('process', color)
 
-        st.download_button('Download texture', buf.getvalue(), f"{st.session_state.bed_color}.png")
-        st.image(st.session_state.edited_bed, width=256)
+                    if st.session_state[color]:
+                        st.subheader(f"processing {color}")
 
+                        img_buffer = io.BytesIO()
+
+                        bed_img.make_bed(
+                            bed_img.load_bed(color),
+                            bed_img.load_img(st.session_state[color]),
+                            st.session_state['image_fit']
+                        ).save(img_buffer, format='PNG')
+
+                        zip_file.writestr(f"{color}.png", img_buffer.getvalue())
+
+                    else:
+                        print('nothing uploaded')
+
+        zip_buffer.seek(0)
+
+        st.download_button('DOWNLOAD ZIP', data=zip_buffer, file_name='bed_textures.zip', mime='application/zip')
 
 def main():
     # RUN IT UP
     st.set_page_config('Minecraft Bed Texture')
-    
-    color_selector()
 
-    image_fit()
+    col1, col2, col3 = st.columns(3, border=True)
 
-    image_selector()
+    with col1:
 
-    modified_bed()
+        image_fit()
+        image_download()
+
+
+    with col2:
+
+        st.header('Upload files for each bed color 😀', divider=True)
+        for color in BED_COLORS[0:8]:
+            image_selector(color)
+
+    with col3:
+
+        st.header('Upload files for each bed color 😀', divider=True)
+        for color in BED_COLORS[8:16]:
+            image_selector(color)
+
+        
+
     
 if __name__ == "__main__":
     main()

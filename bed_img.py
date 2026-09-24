@@ -67,12 +67,9 @@ def pad_image(img: Image.Image) -> Image.Image:
 
 
 # MAKE THAT CUSTOM BED TEXTURE
-def make_bed(bed_img: Image.Image, img: Image.Image, fit='crop') -> Image.Image:
+def make_bed(bed_img: Image.Image, img: Image.Image, fit='stretch') -> Image.Image:
     if not bed_img or not img:
         return None
-    
-    # Make resized bed texture
-    new_bed = bed_img.resize([1024,1024], resample=0)
 
     # Make a variable for the eventual image
     bed_top = None
@@ -84,8 +81,10 @@ def make_bed(bed_img: Image.Image, img: Image.Image, fit='crop') -> Image.Image:
         case 'pad':
             bed_top = pad_image(img)
 
-    # I actually don't need this
-    # bed_top = bed_top.convert('RGBA')
+    # Make resized 1k bed texture using nearest neighbor
+    new_bed = bed_img.resize([1024,1024], resample=0)
+
     # Paste that image on top of the bed
     new_bed.alpha_composite(im = bed_top, dest = LEFT_UPPER)
+
     return new_bed
