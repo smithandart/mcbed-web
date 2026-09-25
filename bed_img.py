@@ -65,6 +65,11 @@ def pad_image(img: Image.Image) -> Image.Image:
         diff = int((img.width * 2 - img.height)//2)
         return ImageOps.expand(img, border=(0, diff, 0, diff)).resize(size = BED_TOP)
 
+def square_img(img: Image.Image) -> Image.Image:
+    if not img:
+        return None
+
+    return img.resize((128, 128))
 
 # MAKE THAT CUSTOM BED TEXTURE
 def make_bed(bed_img: Image.Image, img: Image.Image, fit='stretch') -> Image.Image:

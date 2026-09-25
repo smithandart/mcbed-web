@@ -2,6 +2,8 @@ import streamlit as st
 import bed_img
 import io
 import zipfile
+import json
+import uuid
 
 # File names of each bed color in Minecraft
 BED_COLORS = [
@@ -31,51 +33,115 @@ IMAGE_FORMATS = [
     '.webp'
 ]
 
+
+
 # The part that lets the user select an option for how the image will be fit on the bed
 def image_fit() -> None:
     st.header('Choose how your image will fit 😀', divider=True)
-    option = st.selectbox('image fit selection', ['stretch','crop','pad'], label_visibility='hidden')
+    st.selectbox('image fit selection', ['stretch','crop','pad'], label_visibility='hidden', key='image_fit')
 
-    if option:
-        st.session_state.image_fit = option
 
 # The image selection widgets that ask the user to give an image
 @st.fragment
 def image_selector(key):
     st.subheader(f"{key} 😀", text_alignment='right')
     # Select a custom image to put on the bed
-    st.file_uploader('image uploader', type=IMAGE_FORMATS, label_visibility='hidden', key=key)
+    st.file_uploader('', type=IMAGE_FORMATS, label_visibility='hidden', key=key)
 
-def image_download():
-    st.header('Process your images 😀', divider=True)
-    if st.button('CREATE ZIP'):
+def pack_download():
+    st.header('Process your resource pack 😀', divider=True)
+    if st.button('CREATE RESOURCE PACK'):
 
+        # This is the buffer the pack will be stored in as a zip file
         zip_buffer = io.BytesIO()
 
+        # start a zip file
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            
+
+            # Go through each bed color
             for color in BED_COLORS:
-                    print('process', color)
 
+                    # Check if a color has an uploaded image
                     if st.session_state[color]:
-                        st.subheader(f"processing {color}")
 
+                        # make a buffer to save the images to
                         img_buffer = io.BytesIO()
 
+                        # Make the custom bed texture and save to the buffer
                         bed_img.make_bed(
                             bed_img.load_bed(color),
                             bed_img.load_img(st.session_state[color]),
                             st.session_state['image_fit']
                         ).save(img_buffer, format='PNG')
 
-                        zip_file.writestr(f"{color}.png", img_buffer.getvalue())
+                        # write the image to the zip file
+                        zip_file.writestr(f"textures/entity/bed/{color}.png", img_buffer.getvalue())
 
-                    else:
-                        print('nothing uploaded')
 
+            # Check if an icon image has been uploaded
+            if st.session_state['pack_icon']:
+                img_buffer = io.BytesIO()
+
+                # make a 128x128 version of the icon image and save
+                bed_img.square_img(bed_img.load_img(st.session_state['pack_icon'])).save(img_buffer, format='PNG')
+
+                zip_file.writestr('pack_icon.png', img_buffer.getvalue())
+
+            zip_file.writestr('manifest.json', generate_manifest())
+
+        # return the buffer to the beginning
         zip_buffer.seek(0)
 
-        st.download_button('DOWNLOAD ZIP', data=zip_buffer, file_name='bed_textures.zip', mime='application/zip')
+        # create the download button
+        st.download_button('DOWNLOAD RESOURCE PACK', data=zip_buffer, file_name='custom_beds.mcpack', mime='application/zip')
+
+def pack_info():
+    st.header('Change the information for your resource pack 😀', divider=True)
+
+    # pack name
+    st.text_input('name', value='custom beds', key='pack_name')
+
+    # pack description
+    st.text_input('description', value='this pack changes beds', key='pack_desc')
+
+    # pack icon
+    st.file_uploader('icon', type=IMAGE_FORMATS, key='pack_icon')
+
+
+# create the json string for the manifest file
+def generate_manifest():
+
+     # standard example manifest file
+    base_manifest = {
+        'format_version': 2,
+        'header': {
+            'description': 'this pack changes beds',
+            'name': 'custom_beds',
+            'uuid': str(uuid.uuid4()),
+            'version': [0,0,1],
+            'min_engine_version': [1,26,50]
+        },
+        'modules': [
+            {
+                'description': 'this pack changes beds',
+                'type': 'resources',
+                'uuid': str(uuid.uuid4()),
+                'version': [0,0,1]
+            }
+        ]
+    }
+
+    # check for a custom name
+    if st.session_state['pack_name']:
+        base_manifest['header']['name'] = st.session_state['pack_name']
+
+    # check for a custom description
+    if st.session_state['pack_desc']:
+        base_manifest['header']['description'] = st.session_state['pack_desc']
+        base_manifest['modules'][0]['description'] = st.session_state['pack_desc']
+
+    # dump it as a json string
+    return json.dumps(base_manifest)
 
 def main():
     # RUN IT UP
@@ -85,8 +151,9 @@ def main():
 
     with col1:
 
+        pack_info()
         image_fit()
-        image_download()
+        pack_download()
 
 
     with col2:
