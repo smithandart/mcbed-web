@@ -145,7 +145,10 @@ def generate_manifest():
 
 def main():
     # RUN IT UP
-    st.set_page_config('Minecraft Bed Texture')
+    st.set_page_config('Minecraft Bed Resource Pack Generator')
+
+
+    st.link_button('I NEED HELP', 'https://github.com/smithandart/mcbed-web/blob/main/README.md', width='stretch')
 
     col1, col2, col3 = st.columns(3, border=True)
 
