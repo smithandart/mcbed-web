@@ -58,18 +58,23 @@ def pad_image(img: Image.Image) -> Image.Image:
     # Is the height greater than twice the width?
     # Pad out the width to get a 1:2 aspect ratio
     elif img.height > img.width * 2:
-        diff = int((img.height / 2 - img.width)//2)
-        return ImageOps.expand(img, border=(diff, 0, diff, 0)).resize(size = BED_TOP)
+        diff = int((img.height / 2 - img.width)/2)
+
+        # Create a bigger image that has a larger width
+        padded = Image.new('RGBA', (diff*2 + img.width, img.height))
+        padded.paste(img, (diff, 0))
+        
+        return padded.resize(size = BED_TOP)
+    
     # Otherwise, just pad out the height and resize that thing to 256x512
     else:
-        diff = int((img.width * 2 - img.height)//2)
-        return ImageOps.expand(img, border=(0, diff, 0, diff)).resize(size = BED_TOP)
+        diff = int((img.width * 2 - img.height)/2)
 
-def square_img(img: Image.Image) -> Image.Image:
-    if not img:
-        return None
-
-    return img.resize((128, 128))
+        # Create a bigger image that has a large height
+        padded = Image.new('RGBA', (img.width, diff*2 + img.height))
+        padded.paste(img, (0, diff))
+        
+        return padded.resize(size = BED_TOP)
 
 # MAKE THAT CUSTOM BED TEXTURE
 def make_bed(bed_img: Image.Image, img: Image.Image, fit='stretch') -> Image.Image:
@@ -93,3 +98,12 @@ def make_bed(bed_img: Image.Image, img: Image.Image, fit='stretch') -> Image.Ima
     new_bed.alpha_composite(im = bed_top, dest = LEFT_UPPER)
 
     return new_bed
+
+def square_image(img: Image.Image, size=128) -> Image.Image:
+    if not img:
+        return None
+
+    return img.resize((size, size))
+
+def quant_image(img: Image.Image, colors: int = 16) -> Image.Image:
+    return img.quantize(colors=colors, method=Image.Quantize.FASTOCTREE)

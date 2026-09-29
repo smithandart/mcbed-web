@@ -150,26 +150,22 @@ def main():
 
     st.link_button('I NEED HELP', 'https://github.com/smithandart/mcbed-web/blob/main/README.md', width='stretch')
 
-    col1, col2, col3 = st.columns(3, border=True)
+    # col1, col2, col3 = st.columns(3, border=True)
 
-    with col1:
+    with st.expander('SETTINGS'):
 
         pack_info()
         image_fit()
-        pack_download()
 
-
-    with col2:
-
+    with st.expander('BED COLORS (KINDA NECESSARY)'):
         st.header('Upload files for each bed color 😀', divider=True)
-        for color in BED_COLORS[0:8]:
+        for color in BED_COLORS:
             image_selector(color)
 
-    with col3:
+    pack_download()
 
-        st.header('Upload files for each bed color 😀', divider=True)
-        for color in BED_COLORS[8:16]:
-            image_selector(color)
+    
+
 
         
 
