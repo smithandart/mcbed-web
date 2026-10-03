@@ -83,7 +83,7 @@ def pack_download():
                 img_buffer = io.BytesIO()
 
                 # make a 128x128 version of the icon image and save
-                bed_img.square_img(bed_img.load_img(st.session_state['pack_icon'])).save(img_buffer, format='PNG')
+                bed_img.make_icon(bed_img.load_img(st.session_state['pack_icon'])).save(img_buffer, format='PNG')
 
                 zip_file.writestr('pack_icon.png', img_buffer.getvalue())
 

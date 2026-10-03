@@ -99,7 +99,7 @@ def make_bed(bed_img: Image.Image, img: Image.Image, fit='stretch') -> Image.Ima
 
     return new_bed
 
-def square_image(img: Image.Image, size=128) -> Image.Image:
+def make_icon(img: Image.Image, size=128) -> Image.Image:
     if not img:
         return None
 
